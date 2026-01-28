@@ -1,13 +1,5 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-  useSharedValue,
-  withSequence,
-  withTiming,
-  runOnJS,
-} from 'react-native-reanimated';
 import { Colors, BorderRadius, Spacing, FontSizes, FontWeights, Shadows } from '../constants/theme';
 import { Habit, Streak } from '../types';
 
@@ -28,20 +20,6 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   onPress,
   onLongPress,
 }) => {
-  const scale = useSharedValue(1);
-
-  const handlePressIn = () => {
-    scale.value = withSpring(0.97, { damping: 15 });
-  };
-
-  const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 15 });
-  };
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
   const getStreakDisplay = () => {
     if (!streak || streak.currentStreak === 0) return null;
 
@@ -67,13 +45,11 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   };
 
   return (
-    <Animated.View style={animatedStyle}>
+    <View>
       <TouchableOpacity
         onPress={onPress}
         onLongPress={onLongPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        activeOpacity={1}
+        activeOpacity={0.7}
         disabled={isCompleted}
         style={[
           styles.container,
@@ -101,7 +77,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
           {getPointsDisplay()}
         </View>
       </TouchableOpacity>
-    </Animated.View>
+    </View>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,25 +7,14 @@ import {
   ScrollView,
   TextInput,
   Alert,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import Animated, {
-  FadeIn,
-  FadeOut,
-  SlideInRight,
-  SlideOutLeft,
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withSequence,
-  withTiming,
-  runOnJS,
-} from 'react-native-reanimated';
 import { useApp } from '../context/AppContext';
 import { Button, ProgressBar, Timer, Card } from '../components';
-import { Colors, Spacing, FontSizes, FontWeights, BorderRadius, Shadows } from '../constants/theme';
-import { TodayStackParamList, HabitStep, StepResponse, ResponseType } from '../types';
+import { Colors, Spacing, FontSizes, FontWeights, BorderRadius } from '../constants/theme';
+import { TodayStackParamList, HabitStep, StepResponse } from '../types';
 
 type RouteProps = RouteProp<TodayStackParamList, 'HabitWizard'>;
 
@@ -47,8 +36,9 @@ export const HabitWizardScreen: React.FC = () => {
     perfectDayBonus: number;
   } | null>(null);
 
-  const scale = useSharedValue(1);
-  const confettiOpacity = useSharedValue(0);
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const confettiAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(0)).current;
 
   const currentStep = useMemo(() => {
     if (!habit || habit.steps.length === 0) return null;
@@ -59,6 +49,16 @@ export const HabitWizardScreen: React.FC = () => {
     if (!habit || habit.steps.length === 0) return 1;
     return (currentStepIndex + 1) / habit.steps.length;
   }, [habit, currentStepIndex]);
+
+  // Slide animation when step changes
+  useEffect(() => {
+    slideAnim.setValue(50);
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }, [currentStepIndex, slideAnim]);
 
   const handleSetResponse = useCallback((stepId: string, value: any) => {
     setResponses((prev) => new Map(prev).set(stepId, value));
@@ -86,32 +86,41 @@ export const HabitWizardScreen: React.FC = () => {
         setShowCompletion(true);
 
         // Trigger celebration animation
-        scale.value = withSequence(
-          withSpring(1.2, { damping: 10 }),
-          withSpring(1, { damping: 15 })
-        );
-        confettiOpacity.value = withSequence(
-          withTiming(1, { duration: 200 }),
-          withTiming(1, { duration: 1500 }),
-          withTiming(0, { duration: 500 })
-        );
+        Animated.sequence([
+          Animated.spring(scaleAnim, {
+            toValue: 1.2,
+            friction: 3,
+            useNativeDriver: true,
+          }),
+          Animated.spring(scaleAnim, {
+            toValue: 1,
+            friction: 5,
+            useNativeDriver: true,
+          }),
+        ]).start();
+
+        Animated.sequence([
+          Animated.timing(confettiAnim, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: true,
+          }),
+          Animated.delay(1500),
+          Animated.timing(confettiAnim, {
+            toValue: 0,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+        ]).start();
       } catch (error) {
         Alert.alert('Error', 'Failed to complete habit. Please try again.');
       }
     }
-  }, [habit, currentStepIndex, responses, completeHabit, timeOfDay, scale, confettiOpacity]);
+  }, [habit, currentStepIndex, responses, completeHabit, timeOfDay, scaleAnim, confettiAnim]);
 
   const handleFinish = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
-
-  const celebrationStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const confettiStyle = useAnimatedStyle(() => ({
-    opacity: confettiOpacity.value,
-  }));
 
   if (!habit) {
     return (
@@ -126,11 +135,11 @@ export const HabitWizardScreen: React.FC = () => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.completionContainer}>
-          <Animated.View style={[styles.confetti, confettiStyle]}>
+          <Animated.View style={[styles.confetti, { opacity: confettiAnim }]}>
             <Text style={styles.confettiEmoji}>🎉 🎊 ✨ 🌟 🎉</Text>
           </Animated.View>
 
-          <Animated.View style={[styles.completionContent, celebrationStyle]}>
+          <Animated.View style={[styles.completionContent, { transform: [{ scale: scaleAnim }] }]}>
             <Text style={styles.completionEmoji}>🏆</Text>
             <Text style={styles.completionTitle}>Habit Completed!</Text>
             <Text style={styles.habitName}>{habit.name}</Text>
@@ -146,16 +155,13 @@ export const HabitWizardScreen: React.FC = () => {
             </Card>
 
             {completionData.isPerfectDay && (
-              <Animated.View
-                entering={FadeIn.delay(500).duration(300)}
-                style={styles.perfectDayCard}
-              >
+              <View style={styles.perfectDayCard}>
                 <Text style={styles.perfectDayEmoji}>🌟</Text>
                 <Text style={styles.perfectDayTitle}>PERFECT DAY!</Text>
                 <Text style={styles.perfectDayBonus}>
                   +{completionData.perfectDayBonus} safe points 🛡️
                 </Text>
-              </Animated.View>
+              </View>
             )}
 
             <Button
@@ -228,8 +234,7 @@ export const HabitWizardScreen: React.FC = () => {
         {currentStep && (
           <Animated.View
             key={currentStep.id}
-            entering={SlideInRight.duration(200)}
-            exiting={SlideOutLeft.duration(150)}
+            style={{ transform: [{ translateX: slideAnim }] }}
           >
             <StepContent
               step={currentStep}
@@ -458,8 +463,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: Colors.border,
   },
-
-  // Yes/No
   yesNoContainer: {
     flexDirection: 'row',
     gap: Spacing.md,
@@ -489,8 +492,6 @@ const styles = StyleSheet.create({
   yesNoTextSelected: {
     color: Colors.success,
   },
-
-  // Scale
   scaleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -519,8 +520,6 @@ const styles = StyleSheet.create({
   scaleTextSelected: {
     color: Colors.textOnPrimary,
   },
-
-  // Multiple Choice
   multipleChoiceContainer: {
     gap: Spacing.sm,
   },
@@ -544,8 +543,6 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontWeight: FontWeights.semibold,
   },
-
-  // Free Text
   freeTextInput: {
     backgroundColor: Colors.surfaceVariant,
     borderRadius: BorderRadius.md,
@@ -556,8 +553,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-
-  // No steps
   noStepsContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -573,8 +568,6 @@ const styles = StyleSheet.create({
   completeButton: {
     marginBottom: Spacing.md,
   },
-
-  // Completion
   completionContainer: {
     flex: 1,
     justifyContent: 'center',

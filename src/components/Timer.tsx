@@ -1,12 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withSequence,
-  withRepeat,
-} from 'react-native-reanimated';
+import { View, Text, StyleSheet, ViewStyle, Animated } from 'react-native';
 import { Colors, BorderRadius, Spacing, FontSizes, FontWeights } from '../constants/theme';
 import { Button } from './Button';
 import { formatTimer } from '../utils/helpers';
@@ -28,34 +21,49 @@ export const Timer: React.FC<TimerProps> = ({
   const [isRunning, setIsRunning] = useState(autoStart);
   const [isComplete, setIsComplete] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  const pulse = useSharedValue(1);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
 
   const progress = (totalSeconds - remainingSeconds) / totalSeconds;
 
   const startTimer = useCallback(() => {
     setIsRunning(true);
-    pulse.value = withRepeat(
-      withSequence(
-        withTiming(1.05, { duration: 500 }),
-        withTiming(1, { duration: 500 })
-      ),
-      -1,
-      true
-    );
-  }, [pulse]);
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.05,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [pulseAnim]);
 
   const pauseTimer = useCallback(() => {
     setIsRunning(false);
-    pulse.value = withTiming(1, { duration: 200 });
-  }, [pulse]);
+    pulseAnim.stopAnimation();
+    Animated.timing(pulseAnim, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }, [pulseAnim]);
 
   const resetTimer = useCallback(() => {
     setIsRunning(false);
     setIsComplete(false);
     setRemainingSeconds(totalSeconds);
-    pulse.value = withTiming(1, { duration: 200 });
-  }, [totalSeconds, pulse]);
+    pulseAnim.stopAnimation();
+    Animated.timing(pulseAnim, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }, [totalSeconds, pulseAnim]);
 
   useEffect(() => {
     if (isRunning && remainingSeconds > 0) {
@@ -64,7 +72,7 @@ export const Timer: React.FC<TimerProps> = ({
           if (prev <= 1) {
             setIsRunning(false);
             setIsComplete(true);
-            pulse.value = withTiming(1, { duration: 200 });
+            pulseAnim.stopAnimation();
             onComplete?.();
             return 0;
           }
@@ -78,11 +86,7 @@ export const Timer: React.FC<TimerProps> = ({
         clearInterval(intervalRef.current);
       }
     };
-  }, [isRunning, remainingSeconds, onComplete, pulse]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pulse.value }],
-  }));
+  }, [isRunning, remainingSeconds, onComplete, pulseAnim]);
 
   const getStatusColor = () => {
     if (isComplete) return Colors.success;
@@ -92,7 +96,7 @@ export const Timer: React.FC<TimerProps> = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      <Animated.View style={[styles.timerDisplay, animatedStyle]}>
+      <Animated.View style={[styles.timerDisplay, { transform: [{ scale: pulseAnim }] }]}>
         <Text style={[styles.timerText, { color: getStatusColor() }]}>
           {formatTimer(remainingSeconds)}
         </Text>

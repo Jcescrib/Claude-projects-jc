@@ -1,10 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  withTiming,
-  Easing,
-} from 'react-native-reanimated';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, ViewStyle, Animated } from 'react-native';
 import { Colors, BorderRadius, Spacing, FontSizes, FontWeights } from '../constants/theme';
 
 interface ProgressBarProps {
@@ -27,15 +22,15 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   containerStyle,
 }) => {
   const clampedProgress = Math.min(Math.max(progress, 0), 1);
+  const widthAnim = useRef(new Animated.Value(clampedProgress * 100)).current;
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      width: withTiming(`${clampedProgress * 100}%`, {
-        duration: 300,
-        easing: Easing.out(Easing.cubic),
-      }),
-    };
-  });
+  useEffect(() => {
+    Animated.timing(widthAnim, {
+      toValue: clampedProgress * 100,
+      duration: 300,
+      useNativeDriver: false, // width animation cannot use native driver
+    }).start();
+  }, [clampedProgress, widthAnim]);
 
   return (
     <View style={[styles.container, containerStyle]}>
@@ -51,8 +46,15 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
         <Animated.View
           style={[
             styles.fill,
-            { backgroundColor: color, height, borderRadius: height / 2 },
-            animatedStyle,
+            {
+              backgroundColor: color,
+              height,
+              borderRadius: height / 2,
+              width: widthAnim.interpolate({
+                inputRange: [0, 100],
+                outputRange: ['0%', '100%'],
+              }),
+            },
           ]}
         />
       </View>

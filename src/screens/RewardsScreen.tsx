@@ -12,14 +12,6 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, {
-  FadeIn,
-  FadeOut,
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withSequence,
-} from 'react-native-reanimated';
 import { useApp } from '../context/AppContext';
 import { Button, Input, Card, EmptyState, Toggle, PointsDisplay } from '../components';
 import { Colors, Spacing, FontSizes, FontWeights, BorderRadius, Shadows } from '../constants/theme';
@@ -41,8 +33,6 @@ export const RewardsScreen: React.FC = () => {
   const [description, setDescription] = useState('');
   const [cost, setCost] = useState('');
   const [type, setType] = useState<RewardType>('one_shot');
-
-  const scale = useSharedValue(1);
 
   const availableRewards = rewards.filter((r) => r.status === 'available');
   const unlockedRewards = rewards.filter((r) => r.status === 'unlocked');
@@ -123,18 +113,12 @@ export const RewardsScreen: React.FC = () => {
         {
           text: 'Redeem',
           onPress: async () => {
-            const success = await redeemReward(reward);
-            if (success) {
-              scale.value = withSequence(
-                withSpring(1.2),
-                withSpring(1)
-              );
-            }
+            await redeemReward(reward);
           },
         },
       ]
     );
-  }, [pointsSummary.spendable, redeemReward, scale]);
+  }, [pointsSummary.spendable, redeemReward]);
 
   const handleDelete = useCallback((reward: Reward) => {
     Alert.alert(
@@ -156,7 +140,7 @@ export const RewardsScreen: React.FC = () => {
     const isUnlocked = item.status === 'unlocked';
 
     return (
-      <Animated.View entering={FadeIn.duration(200)}>
+      <View>
         <Card style={[styles.rewardCard, isUnlocked ? styles.rewardCardUnlocked : undefined]}>
           <View style={styles.rewardHeader}>
             <View style={styles.rewardInfo}>
@@ -215,7 +199,7 @@ export const RewardsScreen: React.FC = () => {
             </TouchableOpacity>
           )}
         </Card>
-      </Animated.View>
+      </View>
     );
   }, [pointsSummary.spendable, handleRedeem, handleOpenModal, handleDelete]);
 

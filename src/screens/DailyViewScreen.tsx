@@ -10,10 +10,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated, {
-  FadeIn,
-  FadeOut,
-} from 'react-native-reanimated';
 import { useApp } from '../context/AppContext';
 import { HabitCard, EmptyState, PointsDisplay } from '../components';
 import { Colors, Spacing, FontSizes, FontWeights, Shadows, BorderRadius, TimeOfDayConfig } from '../constants/theme';
@@ -94,14 +90,14 @@ export const DailyViewScreen: React.FC = () => {
     const completed = isHabitCompletedToday(item.id, selectedTime);
 
     return (
-      <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(150)}>
+      <View>
         <HabitCard
           habit={item}
           streak={streak}
           isCompleted={completed}
           onPress={() => handleHabitPress(item)}
         />
-      </Animated.View>
+      </View>
     );
   }, [streaks, isHabitCompletedToday, selectedTime, handleHabitPress]);
 

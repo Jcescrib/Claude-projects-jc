@@ -1,12 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-  useSharedValue,
-  withSequence,
-  withTiming,
-} from 'react-native-reanimated';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, ViewStyle, Animated } from 'react-native';
 import { Colors, BorderRadius, Spacing, FontSizes, FontWeights, Shadows } from '../constants/theme';
 import { PointsSummary } from '../types';
 
@@ -87,33 +80,50 @@ export const PointsAnimation: React.FC<PointsAnimationProps> = ({
   type,
   onAnimationComplete,
 }) => {
-  const scale = useSharedValue(0);
-  const opacity = useSharedValue(0);
-  const translateY = useSharedValue(0);
+  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+  const translateYAnim = useRef(new Animated.Value(0)).current;
 
-  React.useEffect(() => {
-    scale.value = withSequence(
-      withSpring(1.2, { damping: 10, stiffness: 100 }),
-      withSpring(1, { damping: 15 })
-    );
-    opacity.value = withSequence(
-      withTiming(1, { duration: 200 }),
-      withTiming(1, { duration: 1500 }),
-      withTiming(0, { duration: 300 })
-    );
-    translateY.value = withTiming(-50, { duration: 2000 });
+  useEffect(() => {
+    Animated.parallel([
+      Animated.sequence([
+        Animated.spring(scaleAnim, {
+          toValue: 1.2,
+          friction: 5,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          friction: 5,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.sequence([
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.delay(1500),
+        Animated.timing(opacityAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.timing(translateYAnim, {
+        toValue: -50,
+        duration: 2000,
+        useNativeDriver: true,
+      }),
+    ]).start();
 
     const timeout = setTimeout(() => {
       onAnimationComplete?.();
     }, 2000);
 
     return () => clearTimeout(timeout);
-  }, [scale, opacity, translateY, onAnimationComplete]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }, { translateY: translateY.value }],
-    opacity: opacity.value,
-  }));
+  }, [scaleAnim, opacityAnim, translateYAnim, onAnimationComplete]);
 
   const getColor = () => {
     switch (type) {
@@ -135,7 +145,13 @@ export const PointsAnimation: React.FC<PointsAnimationProps> = ({
   };
 
   return (
-    <Animated.View style={[styles.animationContainer, animatedStyle]}>
+    <Animated.View style={[
+      styles.animationContainer,
+      {
+        transform: [{ scale: scaleAnim }, { translateY: translateYAnim }],
+        opacity: opacityAnim,
+      }
+    ]}>
       <Text style={[styles.animationText, { color: getColor() }]}>{getText()}</Text>
     </Animated.View>
   );
