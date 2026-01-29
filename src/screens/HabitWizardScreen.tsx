@@ -381,7 +381,7 @@ const FreeTextResponse: React.FC<{
     onChangeText={onChange}
     placeholder="Enter your response..."
     placeholderTextColor={Colors.textTertiary}
-    multiline
+    multiline={true}
     numberOfLines={4}
     textAlignVertical="top"
   />

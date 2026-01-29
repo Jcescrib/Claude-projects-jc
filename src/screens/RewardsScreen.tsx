@@ -305,7 +305,7 @@ export const RewardsScreen: React.FC = () => {
                 value={description}
                 onChangeText={setDescription}
                 placeholder="e.g., Large pepperoni from Tony's"
-                multiline
+                multiline={true}
               />
 
               <Input

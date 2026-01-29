@@ -224,7 +224,7 @@ export const HabitFormScreen: React.FC = () => {
                 setStepFormData({ ...stepFormData, questionText: text })
               }
               placeholder="e.g., Did you complete this task?"
-              multiline
+              multiline={true}
             />
 
             <View style={styles.section}>
@@ -262,7 +262,7 @@ export const HabitFormScreen: React.FC = () => {
                 value={multipleChoiceText}
                 onChangeText={setMultipleChoiceText}
                 placeholder="Option 1\nOption 2\nOption 3"
-                multiline
+                multiline={true}
                 numberOfLines={4}
               />
             )}
