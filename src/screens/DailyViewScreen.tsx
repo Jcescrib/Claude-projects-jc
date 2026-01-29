@@ -94,7 +94,7 @@ export const DailyViewScreen: React.FC = () => {
         <HabitCard
           habit={item}
           streak={streak}
-          isCompleted={completed}
+          isCompleted={completed === true}
           onPress={() => handleHabitPress(item)}
         />
       </View>
@@ -156,7 +156,7 @@ export const DailyViewScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
+            refreshing={refreshing === true}
             onRefresh={handleRefresh}
             tintColor={Colors.primary}
           />

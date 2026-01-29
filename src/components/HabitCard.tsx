@@ -50,7 +50,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
         onPress={onPress}
         onLongPress={onLongPress}
         activeOpacity={0.7}
-        disabled={isCompleted}
+        disabled={isCompleted === true}
         style={[
           styles.container,
           isCompleted && styles.containerCompleted,

@@ -287,9 +287,9 @@ export const RewardsScreen: React.FC = () => {
       )}
 
       <Modal
-        visible={showModal}
+        visible={showModal === true}
         animationType="slide"
-        transparent
+        transparent={true}
         onRequestClose={handleCloseModal}
       >
         <KeyboardAvoidingView
