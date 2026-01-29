@@ -21,11 +21,11 @@ export const Toggle: React.FC<ToggleProps> = ({
     <View style={[styles.container, containerStyle]}>
       <Text style={[styles.label, disabled && styles.labelDisabled]}>{label}</Text>
       <Switch
-        value={value}
+        value={Boolean(value)}
         onValueChange={onValueChange}
-        disabled={disabled}
+        disabled={Boolean(disabled)}
         trackColor={{ false: Colors.surfaceVariant, true: Colors.primaryLight }}
-        thumbColor={value ? Colors.primary : Colors.surface}
+        thumbColor={Boolean(value) ? Colors.primary : Colors.surface}
       />
     </View>
   );

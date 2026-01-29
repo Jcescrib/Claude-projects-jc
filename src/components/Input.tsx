@@ -20,7 +20,17 @@ export const Input: React.FC<InputProps> = ({
   error,
   containerStyle,
   style,
-  ...props
+  multiline,
+  editable,
+  secureTextEntry,
+  autoFocus,
+  autoCorrect,
+  autoCapitalize,
+  selectTextOnFocus,
+  contextMenuHidden,
+  caretHidden,
+  showSoftInputOnFocus,
+  ...restProps
 }) => {
   return (
     <View style={[styles.container, containerStyle]}>
@@ -29,10 +39,21 @@ export const Input: React.FC<InputProps> = ({
         style={[
           styles.input,
           error && styles.inputError,
+          multiline === true && styles.multilineInput,
           style,
         ]}
         placeholderTextColor={Colors.textTertiary}
-        {...props}
+        multiline={multiline === true}
+        editable={editable !== false}
+        secureTextEntry={secureTextEntry === true}
+        autoFocus={autoFocus === true}
+        autoCorrect={autoCorrect !== false}
+        autoCapitalize={autoCapitalize}
+        selectTextOnFocus={selectTextOnFocus === true}
+        contextMenuHidden={contextMenuHidden === true}
+        caretHidden={caretHidden === true}
+        showSoftInputOnFocus={showSoftInputOnFocus !== false}
+        {...restProps}
       />
       {error && <Text style={styles.error}>{error}</Text>}
     </View>
@@ -61,6 +82,10 @@ const styles = StyleSheet.create({
   },
   inputError: {
     borderColor: Colors.error,
+  },
+  multilineInput: {
+    minHeight: 100,
+    textAlignVertical: 'top',
   },
   error: {
     fontSize: FontSizes.xs,
