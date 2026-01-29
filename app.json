@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -21,7 +21,6 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#F8FAFC"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.habittracker.app"
     },
     "web": {
