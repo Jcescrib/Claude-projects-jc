@@ -12,9 +12,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
-import { Button, ProgressBar, Timer, Card } from '../components';
+import { Button, ProgressBar, Timer, Card, Confetti } from '../components';
 import { Colors, Spacing, FontSizes, FontWeights, BorderRadius } from '../constants/theme';
 import { TodayStackParamList, HabitStep, StepResponse } from '../types';
+import * as Haptics from '../utils/haptics';
 
 type RouteProps = RouteProp<TodayStackParamList, 'HabitWizard'>;
 
@@ -29,6 +30,7 @@ export const HabitWizardScreen: React.FC = () => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [responses, setResponses] = useState<Map<string, any>>(new Map());
   const [showCompletion, setShowCompletion] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const [completionData, setCompletionData] = useState<{
     points: number;
     multiplier: number;
@@ -68,6 +70,8 @@ export const HabitWizardScreen: React.FC = () => {
     if (!habit) return;
 
     if (currentStepIndex < habit.steps.length - 1) {
+      // Light haptic feedback when moving to next step
+      Haptics.lightTap();
       setCurrentStepIndex((prev) => prev + 1);
     } else {
       // Complete the habit
@@ -84,6 +88,14 @@ export const HabitWizardScreen: React.FC = () => {
         const result = await completeHabit(habit, timeOfDay, stepResponses);
         setCompletionData(result);
         setShowCompletion(true);
+        setShowConfetti(true);
+
+        // Trigger haptic celebration
+        if (result.isPerfectDay) {
+          Haptics.perfectDayCelebration();
+        } else {
+          Haptics.celebrationPattern();
+        }
 
         // Trigger celebration animation
         Animated.sequence([
@@ -113,6 +125,7 @@ export const HabitWizardScreen: React.FC = () => {
           }),
         ]).start();
       } catch (error) {
+        Haptics.errorNotification();
         Alert.alert('Error', 'Failed to complete habit. Please try again.');
       }
     }
@@ -134,6 +147,12 @@ export const HabitWizardScreen: React.FC = () => {
   if (showCompletion && completionData) {
     return (
       <SafeAreaView style={styles.container}>
+        <Confetti
+          visible={showConfetti}
+          count={completionData.isPerfectDay ? 80 : 50}
+          duration={completionData.isPerfectDay ? 3000 : 2500}
+          onComplete={() => setShowConfetti(false)}
+        />
         <View style={styles.completionContainer}>
           <Animated.View style={[styles.confetti, { opacity: confettiAnim }]}>
             <Text style={styles.confettiEmoji}>🎉 🎊 ✨ 🌟 🎉</Text>

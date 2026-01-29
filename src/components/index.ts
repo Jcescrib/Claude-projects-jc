@@ -8,3 +8,4 @@ export { Timer } from './Timer';
 export { PointsDisplay, PointsAnimation } from './PointsDisplay';
 export { HabitCard, HabitListItem } from './HabitCard';
 export { EmptyState } from './EmptyState';
+export { Confetti } from './Confetti';

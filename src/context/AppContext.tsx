@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { Alert } from 'react-native';
 import {
   Habit,
   HabitCompletion,
@@ -23,6 +24,7 @@ import {
   wasCompletedToday,
   filterHabitsForDayTime,
 } from '../utils/helpers';
+import * as Haptics from '../utils/haptics';
 
 interface AppContextType {
   // State
@@ -120,6 +122,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   useEffect(() => {
     const checkMissedHabits = async () => {
       const today = getTodayDate();
+      const lostStreaks: { habitName: string; days: number; lostPoints: number }[] = [];
 
       for (const habit of habits) {
         if (!habit.isActive) continue;
@@ -133,6 +136,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           !wasCompletedToday(streak.lastCompletedDate) &&
           !wasCompletedYesterday(streak.lastCompletedDate)
         ) {
+          // Track lost streaks for notification
+          lostStreaks.push({
+            habitName: habit.name,
+            days: streak.currentStreak,
+            lostPoints: streak.lockedPoints,
+          });
+
           // Streak is broken - reset it
           await db.resetStreak(habit.id);
         }
@@ -141,6 +151,24 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       // Reload streaks after checking
       const updatedStreaks = await db.getAllStreaks();
       setStreaks(updatedStreaks);
+
+      // Notify user about lost streaks with haptic feedback
+      if (lostStreaks.length > 0) {
+        // Trigger haptic warning for streak loss
+        Haptics.streakLossVibration();
+
+        const message = lostStreaks.length === 1
+          ? `Your ${lostStreaks[0].days}-day streak for "${lostStreaks[0].habitName}" was broken. ${lostStreaks[0].lostPoints > 0 ? `You lost ${Math.round(lostStreaks[0].lostPoints)} locked points.` : ''}`
+          : `${lostStreaks.length} streaks were broken due to missed habits. Keep going - you can rebuild them!`;
+
+        setTimeout(() => {
+          Alert.alert(
+            'Streak Lost',
+            message,
+            [{ text: 'OK', style: 'default' }]
+          );
+        }, 500);
+      }
     };
 
     if (habits.length > 0 && streaks.length > 0) {
@@ -230,24 +258,36 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       let lockedPoints = points;
       let fixedPoints = streak?.fixedPoints || 0;
       let permanentPoints = streak?.permanentPoints || 0;
+      let reachedMilestone = false;
 
       if (wasYesterday && streak) {
         newStreak = streak.currentStreak + 1;
         lockedPoints = streak.lockedPoints + points;
 
         // Check for day 7 milestone
-        if (newStreak >= 7 && newStreak < 21) {
+        if (newStreak === 7) {
           // Move locked points to fixed
           fixedPoints += lockedPoints;
           lockedPoints = 0;
+          reachedMilestone = true;
+        } else if (newStreak > 7 && newStreak < 21) {
+          // After day 7, points go directly to fixed
+          fixedPoints += points;
+          lockedPoints = streak.lockedPoints;
         }
 
         // Check for day 21 milestone
-        if (newStreak >= 21) {
+        if (newStreak === 21) {
           // Move all to permanent
           permanentPoints += fixedPoints + lockedPoints;
           fixedPoints = 0;
           lockedPoints = 0;
+          reachedMilestone = true;
+        } else if (newStreak > 21) {
+          // After day 21, points go directly to permanent
+          permanentPoints += points;
+          lockedPoints = streak.lockedPoints;
+          fixedPoints = streak.fixedPoints;
         }
       }
 
@@ -259,6 +299,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         lastCompletedDate: today,
         startDate: newStreak === 1 ? today : (streak?.startDate || today),
       });
+
+      // Trigger milestone haptic if reached day 7 or day 21
+      if (reachedMilestone) {
+        Haptics.milestoneAchievement();
+      }
     }
 
     // Check for perfect day

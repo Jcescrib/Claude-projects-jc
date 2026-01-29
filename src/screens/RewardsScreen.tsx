@@ -13,9 +13,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
-import { Button, Input, Card, EmptyState, Toggle, PointsDisplay } from '../components';
+import { Button, Input, Card, EmptyState, Toggle, PointsDisplay, Confetti } from '../components';
 import { Colors, Spacing, FontSizes, FontWeights, BorderRadius, Shadows } from '../constants/theme';
 import { Reward, RewardType } from '../types';
+import * as Haptics from '../utils/haptics';
 
 export const RewardsScreen: React.FC = () => {
   const {
@@ -33,6 +34,7 @@ export const RewardsScreen: React.FC = () => {
   const [description, setDescription] = useState('');
   const [cost, setCost] = useState('');
   const [type, setType] = useState<RewardType>('one_shot');
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const availableRewards = rewards.filter((r) => r.status === 'available');
   const unlockedRewards = rewards.filter((r) => r.status === 'unlocked');
@@ -98,6 +100,7 @@ export const RewardsScreen: React.FC = () => {
 
   const handleRedeem = useCallback(async (reward: Reward) => {
     if (pointsSummary.spendable < reward.cost) {
+      Haptics.warningNotification();
       Alert.alert(
         'Insufficient Points',
         `You need ${reward.cost - pointsSummary.spendable} more points to redeem this reward.`
@@ -105,6 +108,7 @@ export const RewardsScreen: React.FC = () => {
       return;
     }
 
+    Haptics.lightTap();
     Alert.alert(
       'Redeem Reward',
       `Are you sure you want to redeem "${reward.name}" for ${reward.cost} points?`,
@@ -113,7 +117,11 @@ export const RewardsScreen: React.FC = () => {
         {
           text: 'Redeem',
           onPress: async () => {
-            await redeemReward(reward);
+            const success = await redeemReward(reward);
+            if (success) {
+              Haptics.rewardRedemption();
+              setShowConfetti(true);
+            }
           },
         },
       ]
@@ -230,6 +238,12 @@ export const RewardsScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <Confetti
+        visible={showConfetti}
+        count={40}
+        duration={2000}
+        onComplete={() => setShowConfetti(false)}
+      />
       {rewards.length === 0 ? (
         <View style={styles.emptyContainer}>
           <PointsDisplay pointsSummary={pointsSummary} containerStyle={styles.emptyPoints} />
