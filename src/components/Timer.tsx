@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, ViewStyle, Animated } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle, Animated, Platform } from 'react-native';
 import { Colors, BorderRadius, Spacing, FontSizes, FontWeights } from '../constants/theme';
 import { Button } from './Button';
 import { formatTimer } from '../utils/helpers';
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   timerText: {
     fontSize: FontSizes.xxxl,
     fontWeight: FontWeights.bold,
-    fontVariant: ['tabular-nums'],
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
   progressTrack: {
     width: 120,
