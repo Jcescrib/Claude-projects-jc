@@ -248,7 +248,7 @@ export const HabitWizardScreen: React.FC = () => {
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false === true}
+        showsVerticalScrollIndicator={false}
       >
         {currentStep && (
           <Animated.View
@@ -393,18 +393,21 @@ const MultipleChoiceResponse: React.FC<{
 const FreeTextResponse: React.FC<{
   value: string | undefined;
   onChange: (value: string) => void;
-}> = ({ value, onChange }) => (
-  <TextInput
-    style={styles.freeTextInput}
-    value={value || ''}
-    onChangeText={onChange}
-    placeholder="Enter your response..."
-    placeholderTextColor={Colors.textTertiary}
-    multiline={true === true}
-    numberOfLines={4}
-    textAlignVertical="top"
-  />
-);
+}> = ({ value, onChange }) => {
+  const textValue = value || '';
+  return (
+    <TextInput
+      style={styles.freeTextInput}
+      value={textValue}
+      onChangeText={onChange}
+      placeholder="Enter your response..."
+      placeholderTextColor={Colors.textTertiary}
+      multiline={true}
+      numberOfLines={4}
+      textAlignVertical="top"
+    />
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -484,7 +487,6 @@ const styles = StyleSheet.create({
   },
   yesNoContainer: {
     flexDirection: 'row',
-    gap: Spacing.md,
   },
   yesNoButton: {
     flex: 1,
@@ -494,6 +496,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: Colors.border,
+    marginRight: Spacing.sm,
   },
   yesNoButtonSelected: {
     backgroundColor: Colors.success + '20',
@@ -514,7 +517,6 @@ const styles = StyleSheet.create({
   scaleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: Spacing.sm,
   },
   scaleButton: {
     flex: 1,
@@ -540,7 +542,6 @@ const styles = StyleSheet.create({
     color: Colors.textOnPrimary,
   },
   multipleChoiceContainer: {
-    gap: Spacing.sm,
   },
   multipleChoiceButton: {
     paddingVertical: Spacing.md,
@@ -549,6 +550,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surfaceVariant,
     borderWidth: 2,
     borderColor: Colors.border,
+    marginBottom: Spacing.sm,
   },
   multipleChoiceButtonSelected: {
     backgroundColor: Colors.primary + '20',
