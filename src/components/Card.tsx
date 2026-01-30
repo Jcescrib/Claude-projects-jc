@@ -18,11 +18,23 @@ export const Card: React.FC<CardProps> = ({
   const getVariantStyles = (): ViewStyle => {
     switch (variant) {
       case 'elevated':
-        return { ...Shadows.lg };
+        return {
+          shadowColor: Shadows.lg.shadowColor,
+          shadowOffset: Shadows.lg.shadowOffset,
+          shadowOpacity: Shadows.lg.shadowOpacity,
+          shadowRadius: Shadows.lg.shadowRadius,
+          elevation: Shadows.lg.elevation,
+        };
       case 'outlined':
         return { borderWidth: 1, borderColor: Colors.border };
       default:
-        return { ...Shadows.md };
+        return {
+          shadowColor: Shadows.md.shadowColor,
+          shadowOffset: Shadows.md.shadowOffset,
+          shadowOpacity: Shadows.md.shadowOpacity,
+          shadowRadius: Shadows.md.shadowRadius,
+          elevation: Shadows.md.elevation,
+        };
     }
   };
 

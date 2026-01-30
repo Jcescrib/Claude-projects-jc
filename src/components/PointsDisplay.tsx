@@ -162,7 +162,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
-    ...Shadows.md,
+    shadowColor: Shadows.md.shadowColor,
+    shadowOffset: Shadows.md.shadowOffset,
+    shadowOpacity: Shadows.md.shadowOpacity,
+    shadowRadius: Shadows.md.shadowRadius,
+    elevation: Shadows.md.elevation,
   },
   row: {
     flexDirection: 'row',
@@ -172,10 +176,10 @@ const styles = StyleSheet.create({
   mainPoints: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
   },
   emoji: {
     fontSize: 32,
+    marginRight: Spacing.sm,
   },
   mainValue: {
     fontSize: FontSizes.xxxl,
@@ -190,22 +194,23 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: Colors.border,
     paddingTop: Spacing.md,
-    gap: Spacing.sm,
   },
   breakdownItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
+    marginRight: Spacing.sm,
   },
   breakdownLabel: {
     flex: 1,
     fontSize: FontSizes.sm,
     color: Colors.textSecondary,
+    marginRight: Spacing.sm,
   },
   breakdownValue: {
     fontSize: FontSizes.sm,
@@ -219,15 +224,19 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    ...Shadows.sm,
+    shadowColor: Shadows.sm.shadowColor,
+    shadowOffset: Shadows.sm.shadowOffset,
+    shadowOpacity: Shadows.sm.shadowOpacity,
+    shadowRadius: Shadows.sm.shadowRadius,
+    elevation: Shadows.sm.elevation,
   },
   compactItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
   },
   compactEmoji: {
     fontSize: 16,
+    marginRight: Spacing.xs,
   },
   compactValue: {
     fontSize: FontSizes.md,
@@ -247,7 +256,11 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
-    ...Shadows.lg,
+    shadowColor: Shadows.lg.shadowColor,
+    shadowOffset: Shadows.lg.shadowOffset,
+    shadowOpacity: Shadows.lg.shadowOpacity,
+    shadowRadius: Shadows.lg.shadowRadius,
+    elevation: Shadows.lg.elevation,
   },
   animationText: {
     fontSize: FontSizes.xl,

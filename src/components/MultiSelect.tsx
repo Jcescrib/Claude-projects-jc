@@ -80,7 +80,6 @@ const styles = StyleSheet.create({
   optionsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.sm,
   },
   option: {
     paddingHorizontal: Spacing.md,
@@ -89,6 +88,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surfaceVariant,
     borderWidth: 1,
     borderColor: Colors.border,
+    marginRight: Spacing.sm,
+    marginBottom: Spacing.sm,
   },
   optionCompact: {
     paddingHorizontal: Spacing.sm,
