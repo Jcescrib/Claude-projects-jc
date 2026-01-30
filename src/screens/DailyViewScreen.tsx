@@ -153,7 +153,7 @@ export const DailyViewScreen: React.FC = () => {
         renderItem={renderHabit}
         ListHeaderComponent={ListHeader}
         contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={false === true}
         refreshControl={
           <RefreshControl
             refreshing={refreshing === true}

@@ -148,7 +148,7 @@ export const HabitWizardScreen: React.FC = () => {
     return (
       <SafeAreaView style={styles.container}>
         <Confetti
-          visible={showConfetti}
+          visible={showConfetti === true}
           count={completionData.isPerfectDay ? 80 : 50}
           duration={completionData.isPerfectDay ? 3000 : 2500}
           onComplete={() => setShowConfetti(false)}
@@ -248,7 +248,7 @@ export const HabitWizardScreen: React.FC = () => {
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={false === true}
       >
         {currentStep && (
           <Animated.View
@@ -400,7 +400,7 @@ const FreeTextResponse: React.FC<{
     onChangeText={onChange}
     placeholder="Enter your response..."
     placeholderTextColor={Colors.textTertiary}
-    multiline={true}
+    multiline={true === true}
     numberOfLines={4}
     textAlignVertical="top"
   />

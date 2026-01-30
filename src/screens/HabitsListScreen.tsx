@@ -86,7 +86,7 @@ export const HabitsListScreen: React.FC = () => {
         keyExtractor={(item) => item.id}
         renderItem={renderHabit}
         contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={false === true}
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Your Habits</Text>

@@ -46,7 +46,7 @@ export const ProgressScreen: React.FC = () => {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={false === true}
       >
         <Text style={styles.title}>My Progress</Text>
 

@@ -271,7 +271,7 @@ export const RewardsScreen: React.FC = () => {
               </View>
             }
             contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
+            showsVerticalScrollIndicator={false === true}
           />
 
           <View style={styles.fabContainer}>
@@ -306,7 +306,7 @@ export const RewardsScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView showsVerticalScrollIndicator={false === true}>
               <Input
                 label="Reward Name"
                 value={name}
@@ -319,7 +319,7 @@ export const RewardsScreen: React.FC = () => {
                 value={description}
                 onChangeText={setDescription}
                 placeholder="e.g., Large pepperoni from Tony's"
-                multiline={true}
+                multiline={true === true}
               />
 
               <Input
