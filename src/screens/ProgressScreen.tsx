@@ -46,7 +46,7 @@ export const ProgressScreen: React.FC = () => {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false === true}
+        showsVerticalScrollIndicator={false}
       >
         <Text style={styles.title}>My Progress</Text>
 
@@ -220,12 +220,13 @@ const styles = StyleSheet.create({
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.sm,
     marginTop: Spacing.lg,
     marginBottom: Spacing.lg,
   },
   statCard: {
-    width: '48%',
+    width: '47%',
+    marginRight: '3%',
+    marginBottom: Spacing.sm,
     alignItems: 'center',
     paddingVertical: Spacing.md,
   },
@@ -333,13 +334,12 @@ const styles = StyleSheet.create({
   pointsBreakdown: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: Spacing.md,
     marginTop: Spacing.sm,
   },
   pointItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
+    marginRight: Spacing.md,
   },
   pointIcon: {
     fontSize: 14,
@@ -347,5 +347,6 @@ const styles = StyleSheet.create({
   pointValue: {
     fontSize: FontSizes.xs,
     color: Colors.textSecondary,
+    marginLeft: Spacing.xs,
   },
 });

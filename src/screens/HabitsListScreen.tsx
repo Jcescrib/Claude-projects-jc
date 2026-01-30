@@ -86,7 +86,7 @@ export const HabitsListScreen: React.FC = () => {
         keyExtractor={(item) => item.id}
         renderItem={renderHabit}
         contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false === true}
+        showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Your Habits</Text>
@@ -144,7 +144,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    ...Shadows.lg,
+    shadowColor: Shadows.lg.shadowColor,
+    shadowOffset: Shadows.lg.shadowOffset,
+    shadowOpacity: Shadows.lg.shadowOpacity,
+    shadowRadius: Shadows.lg.shadowRadius,
+    elevation: Shadows.lg.elevation,
   },
   fabText: {
     fontSize: 32,
