@@ -33,6 +33,8 @@ export const DailyViewScreen: React.FC = () => {
   const [selectedTime, setSelectedTime] = useState<TimeOfDay>(currentTimeOfDay);
   const [refreshing, setRefreshing] = useState(false);
 
+  const isRefreshing: boolean = refreshing === true;
+
   const filteredHabits = useMemo(() => {
     return filterHabitsForDayTime(habits, currentDayOfWeek, selectedTime);
   }, [habits, currentDayOfWeek, selectedTime]);
@@ -48,70 +50,74 @@ export const DailyViewScreen: React.FC = () => {
   }, [refreshData]);
 
   const handleHabitPress = useCallback((habit: Habit) => {
-    if (!isHabitCompletedToday(habit.id, selectedTime)) {
+    const isCompleted = isHabitCompletedToday(habit.id, selectedTime);
+    if (!isCompleted) {
       navigation.navigate('HabitWizard', { habitId: habit.id, timeOfDay: selectedTime });
     }
   }, [isHabitCompletedToday, selectedTime, navigation]);
 
-  const renderTimeTab = useCallback((time: TimeOfDay) => {
+  const renderTimeTab = useCallback((time: TimeOfDay, index: number) => {
     const config = TimeOfDayConfig[time];
     const isSelected = selectedTime === time;
     const isCurrent = time === currentTimeOfDay;
+
+    const tabStyle = [
+      styles.timeTab,
+      isSelected ? styles.timeTabSelected : null,
+      isSelected ? { backgroundColor: config.color } : null,
+      index > 0 ? { marginLeft: Spacing.sm } : null,
+    ];
+
+    const labelStyle = [
+      styles.timeTabLabel,
+      isSelected ? styles.timeTabLabelSelected : null,
+    ];
 
     return (
       <TouchableOpacity
         key={time}
         onPress={() => setSelectedTime(time)}
-        style={[
-          styles.timeTab,
-          isSelected && styles.timeTabSelected,
-          isSelected && { backgroundColor: config.color },
-        ]}
+        style={tabStyle}
         activeOpacity={0.7}
       >
         <Text style={styles.timeTabEmoji}>{config.icon}</Text>
-        <Text
-          style={[
-            styles.timeTabLabel,
-            isSelected && styles.timeTabLabelSelected,
-          ]}
-        >
-          {config.label}
-        </Text>
-        {isCurrent && !isSelected && (
+        <Text style={labelStyle}>{config.label}</Text>
+        {isCurrent && !isSelected ? (
           <View style={[styles.currentDot, { backgroundColor: config.color }]} />
-        )}
+        ) : null}
       </TouchableOpacity>
     );
   }, [selectedTime, currentTimeOfDay]);
 
   const renderHabit = useCallback(({ item }: { item: Habit }) => {
     const streak = streaks.find((s) => s.habitId === item.id);
-    const completed = isHabitCompletedToday(item.id, selectedTime);
+    const isCompleted: boolean = isHabitCompletedToday(item.id, selectedTime) === true;
 
     return (
-      <View>
-        <HabitCard
-          habit={item}
-          streak={streak}
-          isCompleted={completed === true}
-          onPress={() => handleHabitPress(item)}
-        />
-      </View>
+      <HabitCard
+        habit={item}
+        streak={streak}
+        isCompleted={isCompleted}
+        onPress={() => handleHabitPress(item)}
+      />
     );
   }, [streaks, isHabitCompletedToday, selectedTime, handleHabitPress]);
+
+  const progressWidth = filteredHabits.length > 0
+    ? `${(completedCount / filteredHabits.length) * 100}%`
+    : '0%';
 
   const ListHeader = useMemo(() => (
     <View style={styles.headerContainer}>
       <Text style={styles.dateText}>{formatDate(new Date())}</Text>
 
-      <PointsDisplay pointsSummary={pointsSummary} compact />
+      <PointsDisplay pointsSummary={pointsSummary} compact={true} />
 
       <View style={styles.timeTabsContainer}>
-        {orderedTimes.map(renderTimeTab)}
+        {orderedTimes.map((time, index) => renderTimeTab(time, index))}
       </View>
 
-      {filteredHabits.length > 0 && (
+      {filteredHabits.length > 0 ? (
         <View style={styles.progressContainer}>
           <Text style={styles.progressText}>
             {completedCount} of {filteredHabits.length} completed
@@ -121,16 +127,16 @@ export const DailyViewScreen: React.FC = () => {
               style={[
                 styles.progressFill,
                 {
-                  width: `${(completedCount / filteredHabits.length) * 100}%`,
+                  width: progressWidth as any,
                   backgroundColor: TimeOfDayConfig[selectedTime].color,
                 },
               ]}
             />
           </View>
         </View>
-      )}
+      ) : null}
     </View>
-  ), [pointsSummary, filteredHabits.length, completedCount, selectedTime, renderTimeTab]);
+  ), [pointsSummary, filteredHabits.length, completedCount, selectedTime, renderTimeTab, progressWidth]);
 
   if (filteredHabits.length === 0) {
     return (
@@ -153,10 +159,10 @@ export const DailyViewScreen: React.FC = () => {
         renderItem={renderHabit}
         ListHeaderComponent={ListHeader}
         contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false === true}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing === true}
+            refreshing={isRefreshing}
             onRefresh={handleRefresh}
             tintColor={Colors.primary}
           />
@@ -186,7 +192,6 @@ const styles = StyleSheet.create({
   },
   timeTabsContainer: {
     flexDirection: 'row',
-    gap: Spacing.sm,
     marginTop: Spacing.lg,
     marginBottom: Spacing.md,
   },
@@ -197,10 +202,18 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.lg,
     backgroundColor: Colors.surface,
-    ...Shadows.sm,
+    shadowColor: Shadows.sm.shadowColor,
+    shadowOffset: Shadows.sm.shadowOffset,
+    shadowOpacity: Shadows.sm.shadowOpacity,
+    shadowRadius: Shadows.sm.shadowRadius,
+    elevation: Shadows.sm.elevation,
   },
   timeTabSelected: {
-    ...Shadows.md,
+    shadowColor: Shadows.md.shadowColor,
+    shadowOffset: Shadows.md.shadowOffset,
+    shadowOpacity: Shadows.md.shadowOpacity,
+    shadowRadius: Shadows.md.shadowRadius,
+    elevation: Shadows.md.elevation,
   },
   timeTabEmoji: {
     fontSize: 24,
@@ -237,7 +250,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   progressFill: {
-    height: '100%',
+    height: 6,
     borderRadius: 3,
   },
 });
