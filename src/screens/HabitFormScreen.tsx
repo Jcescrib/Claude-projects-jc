@@ -224,7 +224,7 @@ export const HabitFormScreen: React.FC = () => {
                 setStepFormData({ ...stepFormData, questionText: text })
               }
               placeholder="e.g., Did you complete this task?"
-              multiline={true === true}
+              multiline={true}
             />
 
             <View style={styles.section}>
@@ -262,7 +262,7 @@ export const HabitFormScreen: React.FC = () => {
                 value={multipleChoiceText}
                 onChangeText={setMultipleChoiceText}
                 placeholder="Option 1\nOption 2\nOption 3"
-                multiline={true === true}
+                multiline={true}
                 numberOfLines={4}
               />
             )}
@@ -494,7 +494,6 @@ const styles = StyleSheet.create({
   responseTypeContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.sm,
   },
   responseTypeOption: {
     paddingHorizontal: Spacing.md,
@@ -503,6 +502,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surfaceVariant,
     borderWidth: 1,
     borderColor: Colors.border,
+    marginRight: Spacing.sm,
+    marginBottom: Spacing.sm,
   },
   responseTypeOptionSelected: {
     backgroundColor: Colors.primary,
@@ -548,7 +549,6 @@ const styles = StyleSheet.create({
   },
   stepActions: {
     flexDirection: 'row',
-    gap: Spacing.xs,
   },
   stepAction: {
     width: 28,
@@ -557,6 +557,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surfaceVariant,
     justifyContent: 'center',
     alignItems: 'center',
+    marginLeft: Spacing.xs,
   },
   stepActionText: {
     fontSize: FontSizes.md,
@@ -569,15 +570,14 @@ const styles = StyleSheet.create({
   },
   stepMeta: {
     flexDirection: 'row',
-    gap: Spacing.sm,
   },
   stepMetaText: {
     fontSize: FontSizes.xs,
     color: Colors.textTertiary,
+    marginRight: Spacing.sm,
   },
   stepButtons: {
     flexDirection: 'row',
-    gap: Spacing.sm,
     marginTop: Spacing.sm,
     paddingTop: Spacing.sm,
     borderTopWidth: 1,
@@ -586,6 +586,7 @@ const styles = StyleSheet.create({
   stepEditButton: {
     paddingVertical: Spacing.xs,
     paddingHorizontal: Spacing.sm,
+    marginRight: Spacing.sm,
   },
   stepEditText: {
     fontSize: FontSizes.sm,
@@ -603,10 +604,13 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: 'row',
-    gap: Spacing.md,
     padding: Spacing.md,
     backgroundColor: Colors.surface,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
+  },
+  flex: {
+    flex: 1,
+    marginRight: Spacing.sm,
   },
 });
