@@ -5,57 +5,93 @@ import {
   Text,
   StyleSheet,
   ViewStyle,
-  TextInputProps,
+  TextStyle,
+  KeyboardTypeOptions,
+  ReturnKeyTypeOptions,
+  NativeSyntheticEvent,
+  TextInputSubmitEditingEventData,
 } from 'react-native';
 import { Colors, BorderRadius, Spacing, FontSizes, FontWeights } from '../constants/theme';
 
-interface InputProps extends TextInputProps {
+interface InputProps {
   label?: string;
   error?: string;
   containerStyle?: ViewStyle;
+  style?: TextStyle;
+  value: string;
+  onChangeText: (text: string) => void;
+  placeholder?: string;
+  keyboardType?: KeyboardTypeOptions;
+  returnKeyType?: ReturnKeyTypeOptions;
+  multiline?: boolean;
+  numberOfLines?: number;
+  maxLength?: number;
+  secureTextEntry?: boolean;
+  autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  onSubmitEditing?: (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => void;
+  onBlur?: () => void;
+  onFocus?: () => void;
+  testID?: string;
 }
 
-export const Input: React.FC<InputProps> = ({
-  label,
-  error,
-  containerStyle,
-  style,
-  multiline,
-  editable,
-  secureTextEntry,
-  autoFocus,
-  autoCorrect,
-  autoCapitalize,
-  selectTextOnFocus,
-  contextMenuHidden,
-  caretHidden,
-  showSoftInputOnFocus,
-  ...restProps
-}) => {
+export const Input: React.FC<InputProps> = (props) => {
+  const {
+    label,
+    error,
+    containerStyle,
+    style,
+    value,
+    onChangeText,
+    placeholder,
+    keyboardType,
+    returnKeyType,
+    multiline,
+    numberOfLines,
+    maxLength,
+    secureTextEntry,
+    autoCapitalize,
+    onSubmitEditing,
+    onBlur,
+    onFocus,
+    testID,
+  } = props;
+
+  // Explicitly convert boolean props to actual boolean values
+  const isMultiline = multiline === true;
+  const isSecure = secureTextEntry === true;
+
+  const inputStyles = [
+    styles.input,
+    error ? styles.inputError : null,
+    isMultiline ? styles.multilineInput : null,
+    style,
+  ];
+
   return (
     <View style={[styles.container, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label ? <Text style={styles.label}>{label}</Text> : null}
       <TextInput
-        style={[
-          styles.input,
-          error && styles.inputError,
-          multiline === true && styles.multilineInput,
-          style,
-        ]}
+        style={inputStyles}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
         placeholderTextColor={Colors.textTertiary}
-        multiline={multiline === true}
-        editable={editable !== false}
-        secureTextEntry={secureTextEntry === true}
-        autoFocus={autoFocus === true}
-        autoCorrect={autoCorrect !== false}
+        keyboardType={keyboardType}
+        returnKeyType={returnKeyType}
+        multiline={isMultiline}
+        numberOfLines={isMultiline ? (numberOfLines || 4) : undefined}
+        maxLength={maxLength}
+        secureTextEntry={isSecure}
         autoCapitalize={autoCapitalize}
-        selectTextOnFocus={selectTextOnFocus === true}
-        contextMenuHidden={contextMenuHidden === true}
-        caretHidden={caretHidden === true}
-        showSoftInputOnFocus={showSoftInputOnFocus !== false}
-        {...restProps}
+        onSubmitEditing={onSubmitEditing}
+        onBlur={onBlur}
+        onFocus={onFocus}
+        testID={testID}
+        textAlignVertical={isMultiline ? 'top' : 'auto'}
+        autoCorrect={false}
+        spellCheck={false}
       />
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error ? <Text style={styles.error}>{error}</Text> : null}
     </View>
   );
 };

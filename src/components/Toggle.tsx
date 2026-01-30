@@ -10,22 +10,30 @@ interface ToggleProps {
   containerStyle?: ViewStyle;
 }
 
-export const Toggle: React.FC<ToggleProps> = ({
-  label,
-  value,
-  onValueChange,
-  disabled = false,
-  containerStyle,
-}) => {
+export const Toggle: React.FC<ToggleProps> = (props) => {
+  const { label, value, onValueChange, disabled, containerStyle } = props;
+
+  // Explicitly convert to boolean to avoid any type issues with New Architecture
+  const isOn: boolean = value === true;
+  const isDisabled: boolean = disabled === true;
+
+  const labelStyles = [
+    styles.label,
+    isDisabled ? styles.labelDisabled : null,
+  ];
+
   return (
     <View style={[styles.container, containerStyle]}>
-      <Text style={[styles.label, disabled && styles.labelDisabled]}>{label}</Text>
+      <Text style={labelStyles}>{label}</Text>
       <Switch
-        value={Boolean(value)}
+        value={isOn}
         onValueChange={onValueChange}
-        disabled={Boolean(disabled)}
-        trackColor={{ false: Colors.surfaceVariant, true: Colors.primaryLight }}
-        thumbColor={Boolean(value) ? Colors.primary : Colors.surface}
+        disabled={isDisabled}
+        trackColor={{
+          false: Colors.surfaceVariant,
+          true: Colors.primaryLight
+        }}
+        thumbColor={isOn ? Colors.primary : Colors.surface}
       />
     </View>
   );

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, ViewStyle, Animated, Platform } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle, Animated } from 'react-native';
 import { Colors, BorderRadius, Spacing, FontSizes, FontWeights } from '../constants/theme';
 import { Button } from './Button';
 import { formatTimer } from '../utils/helpers';
@@ -11,16 +11,15 @@ interface TimerProps {
   containerStyle?: ViewStyle;
 }
 
-export const Timer: React.FC<TimerProps> = ({
-  totalSeconds,
-  onComplete,
-  autoStart = false,
-  containerStyle,
-}) => {
+export const Timer: React.FC<TimerProps> = (props) => {
+  const { totalSeconds, onComplete, autoStart, containerStyle } = props;
+
+  const shouldAutoStart: boolean = autoStart === true;
+
   const [remainingSeconds, setRemainingSeconds] = useState(totalSeconds);
-  const [isRunning, setIsRunning] = useState(autoStart);
+  const [isRunning, setIsRunning] = useState(shouldAutoStart);
   const [isComplete, setIsComplete] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   const progress = (totalSeconds - remainingSeconds) / totalSeconds;
@@ -73,7 +72,9 @@ export const Timer: React.FC<TimerProps> = ({
             setIsRunning(false);
             setIsComplete(true);
             pulseAnim.stopAnimation();
-            onComplete?.();
+            if (onComplete) {
+              onComplete();
+            }
             return 0;
           }
           return prev - 1;
@@ -88,50 +89,56 @@ export const Timer: React.FC<TimerProps> = ({
     };
   }, [isRunning, remainingSeconds, onComplete, pulseAnim]);
 
-  const getStatusColor = () => {
+  const getStatusColor = (): string => {
     if (isComplete) return Colors.success;
     if (isRunning) return Colors.primary;
     return Colors.textSecondary;
   };
 
+  const containerStyles = [styles.container, containerStyle];
+  const timerTextStyles = [styles.timerText, { color: getStatusColor() }];
+  const progressFillStyles = [
+    styles.progressFill,
+    {
+      width: `${progress * 100}%` as const,
+      backgroundColor: getStatusColor(),
+    },
+  ];
+
+  const showResetButton: boolean = remainingSeconds < totalSeconds;
+
   return (
-    <View style={[styles.container, containerStyle]}>
+    <View style={containerStyles}>
       <Animated.View style={[styles.timerDisplay, { transform: [{ scale: pulseAnim }] }]}>
-        <Text style={[styles.timerText, { color: getStatusColor() }]}>
+        <Text style={timerTextStyles}>
           {formatTimer(remainingSeconds)}
         </Text>
         <View style={styles.progressTrack}>
-          <View
-            style={[
-              styles.progressFill,
-              {
-                width: `${progress * 100}%`,
-                backgroundColor: getStatusColor(),
-              },
-            ]}
-          />
+          <View style={progressFillStyles} />
         </View>
       </Animated.View>
 
       <View style={styles.buttonContainer}>
-        {!isComplete && (
+        {isComplete ? (
+          <Text style={styles.completeText}>Time complete!</Text>
+        ) : (
           <>
-            {!isRunning ? (
-              <Button
-                title="Start"
-                onPress={startTimer}
-                variant="primary"
-                size="sm"
-              />
-            ) : (
+            {isRunning ? (
               <Button
                 title="Pause"
                 onPress={pauseTimer}
                 variant="outline"
                 size="sm"
               />
+            ) : (
+              <Button
+                title="Start"
+                onPress={startTimer}
+                variant="primary"
+                size="sm"
+              />
             )}
-            {remainingSeconds < totalSeconds && (
+            {showResetButton ? (
               <Button
                 title="Reset"
                 onPress={resetTimer}
@@ -139,11 +146,8 @@ export const Timer: React.FC<TimerProps> = ({
                 size="sm"
                 style={styles.resetButton}
               />
-            )}
+            ) : null}
           </>
-        )}
-        {isComplete && (
-          <Text style={styles.completeText}>Time complete!</Text>
         )}
       </View>
     </View>
@@ -164,7 +168,7 @@ const styles = StyleSheet.create({
   timerText: {
     fontSize: FontSizes.xxxl,
     fontWeight: FontWeights.bold,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    fontFamily: 'monospace',
   },
   progressTrack: {
     width: 120,
@@ -175,16 +179,15 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   progressFill: {
-    height: '100%',
+    height: 4,
     borderRadius: 2,
   },
   buttonContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
   },
   resetButton: {
-    marginLeft: Spacing.xs,
+    marginLeft: Spacing.sm,
   },
   completeText: {
     fontSize: FontSizes.sm,

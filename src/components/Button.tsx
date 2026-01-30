@@ -25,20 +25,28 @@ interface ButtonProps {
   fullWidth?: boolean;
 }
 
-export const Button: React.FC<ButtonProps> = ({
-  title,
-  onPress,
-  variant = 'primary',
-  size = 'md',
-  disabled = false,
-  loading = false,
-  icon,
-  style,
-  textStyle,
-  fullWidth = false,
-}) => {
-  const getBackgroundColor = () => {
-    if (disabled) return Colors.surfaceVariant;
+export const Button: React.FC<ButtonProps> = (props) => {
+  const {
+    title,
+    onPress,
+    variant = 'primary',
+    size = 'md',
+    disabled,
+    loading,
+    icon,
+    style,
+    textStyle,
+    fullWidth,
+  } = props;
+
+  // Explicitly convert to boolean
+  const isDisabled: boolean = disabled === true;
+  const isLoading: boolean = loading === true;
+  const isFullWidth: boolean = fullWidth === true;
+  const shouldDisable: boolean = isDisabled || isLoading;
+
+  const getBackgroundColor = (): string => {
+    if (isDisabled) return Colors.surfaceVariant;
     switch (variant) {
       case 'primary':
         return Colors.primary;
@@ -54,8 +62,8 @@ export const Button: React.FC<ButtonProps> = ({
     }
   };
 
-  const getTextColor = () => {
-    if (disabled) return Colors.textTertiary;
+  const getTextColor = (): string => {
+    if (isDisabled) return Colors.textTertiary;
     switch (variant) {
       case 'primary':
       case 'secondary':
@@ -81,7 +89,7 @@ export const Button: React.FC<ButtonProps> = ({
     }
   };
 
-  const getFontSize = () => {
+  const getFontSize = (): number => {
     switch (size) {
       case 'sm':
         return FontSizes.sm;
@@ -92,39 +100,39 @@ export const Button: React.FC<ButtonProps> = ({
     }
   };
 
+  const buttonStyles: ViewStyle[] = [
+    styles.button,
+    getSizeStyles(),
+    {
+      backgroundColor: getBackgroundColor(),
+      borderColor: variant === 'outline' ? Colors.primary : 'transparent',
+      borderWidth: variant === 'outline' ? 2 : 0,
+    },
+    isFullWidth ? styles.fullWidth : null,
+    variant !== 'ghost' ? Shadows.sm : null,
+    style,
+  ].filter((s): s is ViewStyle => s !== null);
+
+  const textStyles: TextStyle[] = [
+    styles.text,
+    { color: getTextColor(), fontSize: getFontSize() },
+    icon ? styles.textWithIcon : null,
+    textStyle,
+  ].filter((s): s is TextStyle => s !== null);
+
   return (
     <TouchableOpacity
       onPress={onPress}
-      disabled={Boolean(disabled) || Boolean(loading)}
+      disabled={shouldDisable}
       activeOpacity={0.7}
-      style={[
-        styles.button,
-        getSizeStyles(),
-        {
-          backgroundColor: getBackgroundColor(),
-          borderColor: variant === 'outline' ? Colors.primary : 'transparent',
-          borderWidth: variant === 'outline' ? 2 : 0,
-        },
-        fullWidth && styles.fullWidth,
-        variant !== 'ghost' && Shadows.sm,
-        style,
-      ]}
+      style={buttonStyles}
     >
-      {loading ? (
+      {isLoading ? (
         <ActivityIndicator color={getTextColor()} size="small" />
       ) : (
         <>
           {icon}
-          <Text
-            style={[
-              styles.text,
-              { color: getTextColor(), fontSize: getFontSize() },
-              icon ? styles.textWithIcon : undefined,
-              textStyle,
-            ]}
-          >
-            {title}
-          </Text>
+          <Text style={textStyles}>{title}</Text>
         </>
       )}
     </TouchableOpacity>
