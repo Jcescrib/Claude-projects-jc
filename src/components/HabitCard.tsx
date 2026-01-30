@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Colors, BorderRadius, Spacing, FontSizes, FontWeights, Shadows } from '../constants/theme';
 import { Habit, Streak } from '../types';
@@ -12,16 +12,15 @@ interface HabitCardProps {
   onLongPress?: () => void;
 }
 
-export const HabitCard: React.FC<HabitCardProps> = ({
-  habit,
-  streak,
-  isCompleted = false,
-  estimatedPoints,
-  onPress,
-  onLongPress,
-}) => {
+export const HabitCard: React.FC<HabitCardProps> = (props) => {
+  const { habit, streak, isCompleted, estimatedPoints, onPress, onLongPress } = props;
+
+  const completed: boolean = isCompleted === true;
+
   const getStreakDisplay = () => {
-    if (!streak || streak.currentStreak === 0) return null;
+    if (!streak || streak.currentStreak === 0) {
+      return null;
+    }
 
     return (
       <View style={styles.streakBadge}>
@@ -31,7 +30,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   };
 
   const getPointsDisplay = () => {
-    if (isCompleted) {
+    if (completed) {
       return <Text style={styles.completedText}>Completed ✓</Text>;
     }
 
@@ -44,31 +43,43 @@ export const HabitCard: React.FC<HabitCardProps> = ({
     );
   };
 
+  const containerStyles = [
+    styles.container,
+    completed ? styles.containerCompleted : null,
+  ];
+
+  const nameStyles = [
+    styles.name,
+    completed ? styles.nameCompleted : null,
+  ];
+
+  const checkboxStyles = [
+    styles.checkbox,
+    completed ? styles.checkboxCompleted : null,
+  ];
+
   return (
     <View>
       <TouchableOpacity
         onPress={onPress}
         onLongPress={onLongPress}
         activeOpacity={0.7}
-        disabled={isCompleted === true}
-        style={[
-          styles.container,
-          isCompleted && styles.containerCompleted,
-        ]}
+        disabled={completed}
+        style={containerStyles}
       >
         <View style={styles.leftSection}>
-          <View style={[styles.checkbox, isCompleted && styles.checkboxCompleted]}>
-            {isCompleted && <Text style={styles.checkmark}>✓</Text>}
+          <View style={checkboxStyles}>
+            {completed ? <Text style={styles.checkmark}>✓</Text> : null}
           </View>
           <View style={styles.textContainer}>
-            <Text style={[styles.name, isCompleted && styles.nameCompleted]} numberOfLines={1}>
+            <Text style={nameStyles} numberOfLines={1}>
               {habit.name}
             </Text>
-            {habit.steps.length > 0 && (
+            {habit.steps.length > 0 ? (
               <Text style={styles.stepsCount}>
                 {habit.steps.length} step{habit.steps.length > 1 ? 's' : ''}
               </Text>
-            )}
+            ) : null}
           </View>
         </View>
 
@@ -90,26 +101,36 @@ interface HabitListItemProps {
   onToggleActive: () => void;
 }
 
-export const HabitListItem: React.FC<HabitListItemProps> = ({
-  habit,
-  onPress,
-  onEdit,
-  onDelete,
-  onDuplicate,
-  onToggleActive,
-}) => {
-  const [showActions, setShowActions] = React.useState(false);
+export const HabitListItem: React.FC<HabitListItemProps> = (props) => {
+  const { habit, onPress, onEdit, onDelete, onDuplicate, onToggleActive } = props;
+  const [showActions, setShowActions] = useState(false);
+
+  const isActive: boolean = habit.isActive === true;
+
+  const handleLongPress = () => {
+    setShowActions(!showActions);
+  };
+
+  const listItemStyles = [
+    styles.listItem,
+    !isActive ? styles.listItemInactive : null,
+  ];
+
+  const listItemNameStyles = [
+    styles.listItemName,
+    !isActive ? styles.listItemNameInactive : null,
+  ];
 
   return (
     <View style={styles.listItemContainer}>
       <TouchableOpacity
         onPress={onPress}
-        onLongPress={() => setShowActions(!showActions)}
+        onLongPress={handleLongPress}
         activeOpacity={0.7}
-        style={[styles.listItem, !habit.isActive && styles.listItemInactive]}
+        style={listItemStyles}
       >
         <View style={styles.listItemLeft}>
-          <Text style={[styles.listItemName, !habit.isActive && styles.listItemNameInactive]}>
+          <Text style={listItemNameStyles}>
             {habit.name}
           </Text>
           <View style={styles.listItemDetails}>
@@ -129,15 +150,15 @@ export const HabitListItem: React.FC<HabitListItemProps> = ({
           <Text style={styles.listItemSteps}>
             {habit.steps.length} steps
           </Text>
-          {!habit.isActive && (
+          {!isActive ? (
             <View style={styles.inactiveBadge}>
               <Text style={styles.inactiveBadgeText}>Inactive</Text>
             </View>
-          )}
+          ) : null}
         </View>
       </TouchableOpacity>
 
-      {showActions && (
+      {showActions ? (
         <View style={styles.actionsContainer}>
           <TouchableOpacity style={styles.actionButton} onPress={onEdit}>
             <Text style={styles.actionText}>Edit</Text>
@@ -146,13 +167,13 @@ export const HabitListItem: React.FC<HabitListItemProps> = ({
             <Text style={styles.actionText}>Duplicate</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionButton} onPress={onToggleActive}>
-            <Text style={styles.actionText}>{habit.isActive ? 'Deactivate' : 'Activate'}</Text>
+            <Text style={styles.actionText}>{isActive ? 'Deactivate' : 'Activate'}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={onDelete}>
             <Text style={[styles.actionText, styles.deleteText]}>Delete</Text>
           </TouchableOpacity>
         </View>
-      )}
+      ) : null}
     </View>
   );
 };
@@ -166,7 +187,11 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
-    ...Shadows.sm,
+    shadowColor: Shadows.sm.shadowColor,
+    shadowOffset: Shadows.sm.shadowOffset,
+    shadowOpacity: Shadows.sm.shadowOpacity,
+    shadowRadius: Shadows.sm.shadowRadius,
+    elevation: Shadows.sm.elevation,
   },
   containerCompleted: {
     backgroundColor: Colors.surfaceVariant,
@@ -216,13 +241,13 @@ const styles = StyleSheet.create({
   rightSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
   },
   streakBadge: {
     backgroundColor: Colors.accent + '20',
     borderRadius: BorderRadius.sm,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 2,
+    marginRight: Spacing.sm,
   },
   streakText: {
     fontSize: FontSizes.xs,
@@ -232,12 +257,12 @@ const styles = StyleSheet.create({
   pointsContainer: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: 2,
   },
   pointsText: {
     fontSize: FontSizes.lg,
     fontWeight: FontWeights.bold,
     color: Colors.primary,
+    marginRight: 2,
   },
   pointsLabel: {
     fontSize: FontSizes.xs,
@@ -248,8 +273,6 @@ const styles = StyleSheet.create({
     fontWeight: FontWeights.medium,
     color: Colors.success,
   },
-
-  // List item styles
   listItemContainer: {
     marginBottom: Spacing.sm,
   },
@@ -260,7 +283,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
-    ...Shadows.sm,
+    shadowColor: Shadows.sm.shadowColor,
+    shadowOffset: Shadows.sm.shadowOffset,
+    shadowOpacity: Shadows.sm.shadowOpacity,
+    shadowRadius: Shadows.sm.shadowRadius,
+    elevation: Shadows.sm.elevation,
   },
   listItemInactive: {
     opacity: 0.6,
@@ -312,7 +339,6 @@ const styles = StyleSheet.create({
   actionsContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    gap: Spacing.sm,
     paddingTop: Spacing.sm,
   },
   actionButton: {
@@ -320,6 +346,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     backgroundColor: Colors.surfaceVariant,
     borderRadius: BorderRadius.sm,
+    marginLeft: Spacing.sm,
   },
   actionText: {
     fontSize: FontSizes.sm,
