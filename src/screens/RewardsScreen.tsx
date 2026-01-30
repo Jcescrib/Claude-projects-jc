@@ -271,7 +271,7 @@ export const RewardsScreen: React.FC = () => {
               </View>
             }
             contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false === true}
+            showsVerticalScrollIndicator={false}
           />
 
           <View style={styles.fabContainer}>
@@ -306,7 +306,7 @@ export const RewardsScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false === true}>
+            <ScrollView showsVerticalScrollIndicator={false}>
               <Input
                 label="Reward Name"
                 value={name}
@@ -319,7 +319,7 @@ export const RewardsScreen: React.FC = () => {
                 value={description}
                 onChangeText={setDescription}
                 placeholder="e.g., Large pepperoni from Tony's"
-                multiline={true === true}
+                multiline={true}
               />
 
               <Input
@@ -454,12 +454,12 @@ const styles = StyleSheet.create({
   rewardMeta: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
   },
   rewardCost: {
     fontSize: FontSizes.lg,
     fontWeight: FontWeights.bold,
     color: Colors.primary,
+    marginRight: Spacing.sm,
   },
   typeBadge: {
     backgroundColor: Colors.surfaceVariant,
@@ -541,7 +541,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    ...Shadows.lg,
+    shadowColor: Shadows.lg.shadowColor,
+    shadowOffset: Shadows.lg.shadowOffset,
+    shadowOpacity: Shadows.lg.shadowOpacity,
+    shadowRadius: Shadows.lg.shadowRadius,
+    elevation: Shadows.lg.elevation,
   },
   fabText: {
     fontSize: 32,
@@ -590,7 +594,6 @@ const styles = StyleSheet.create({
   },
   typeOptions: {
     flexDirection: 'row',
-    gap: Spacing.md,
   },
   typeOption: {
     flex: 1,
@@ -599,6 +602,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surfaceVariant,
     borderWidth: 2,
     borderColor: Colors.border,
+    marginRight: Spacing.sm,
   },
   typeOptionSelected: {
     borderColor: Colors.primary,
@@ -619,10 +623,10 @@ const styles = StyleSheet.create({
   },
   modalButtons: {
     flexDirection: 'row',
-    gap: Spacing.md,
     marginTop: Spacing.lg,
   },
   modalButton: {
     flex: 1,
+    marginRight: Spacing.sm,
   },
 });
